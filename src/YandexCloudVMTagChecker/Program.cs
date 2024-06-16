@@ -23,10 +23,10 @@ public class Program
         foreach (var instance in instancesResponse.Instances)
         {
             if (instance.Labels.TryGetValue("expired_date", out string expiredDateStr) &&
-                DateTime.TryParseExact(expiredDateStr, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                    out DateTime expiredDate))
+                DateTime.TryParseExact(
+                    expiredDateStr, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime expiredDate))
             {
-                if (expiredDate <= DateTime.Today)
+                if (expiredDate <= DateTime.Today && instance.Status == Instance.Types.Status.Running)
                 {
                     Console.WriteLine($"VM {instance.Name} (ID: {instance.Id}) has expired. Shutting down...");
 
@@ -38,6 +38,6 @@ public class Program
             }
         }
         
-        Console.WriteLine("Job is done");
+        Console.WriteLine("Job is done. All expired_dates of VMs have been checked.");
     }
 }
