@@ -1,6 +1,9 @@
 ﻿FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
-USER $APP_UID
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y cron && \
+    mkdir -p /var/run/ /var/spool/cron/crontabs /var/log && \
+    touch /var/log/cron.log
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -18,4 +21,13 @@ RUN dotnet publish "YandexCloudVMTagChecker.csproj" -c $BUILD_CONFIGURATION -o /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "YandexCloudVMTagChecker.dll"]
+
+COPY crontab /etc/cron.d/yandex-cloud-vm-tag-checker-cron
+COPY entrypoint.sh /entrypoint.sh
+
+RUN chmod 0644 /etc/cron.d/yandex-cloud-vm-tag-checker-cron && \
+    chmod +x /entrypoint.sh
+
+RUN crontab /etc/cron.d/yandex-cloud-vm-tag-checker-cron
+
+ENTRYPOINT ["/entrypoint.sh"]

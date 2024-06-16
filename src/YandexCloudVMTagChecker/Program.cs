@@ -11,7 +11,7 @@ public class Program
     {
         var oauthToken = Environment.GetEnvironmentVariable("OAUTH_TOKEN");
         var folderId = Environment.GetEnvironmentVariable("FOLDER_ID");
-
+        
         var sdk = new Sdk(new OAuthCredentialsProvider(oauthToken));
         var instanceService = sdk.Services.Compute.InstanceService;
 
@@ -37,5 +37,7 @@ public class Program
                 }
             }
         }
+        
+        Console.WriteLine("Job is done");
     }
 }
