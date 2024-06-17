@@ -1,26 +1,42 @@
-﻿using YandexCloudVMTagChecker.Exceptions;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Yandex.Cloud.Compute.V1;
+using YandexCloudVMTagChecker.Exceptions;
 using YandexCloudVMTagChecker.Models;
+using YandexCloudVMTagChecker.Models.Interfaces;
 using YandexCloudVMTagChecker.Services;
+using YandexCloudVMTagChecker.Services.Interfaces;
 
 namespace YandexCloudVMTagChecker;
 
-public class Program
+class Program
 {
     static async Task Main(string[] args)
     {
-        var logger = new ConsoleLoggerStrategy();
-        
-        var configuration = new Configuration();
-        string oauthToken = configuration.GetOAuthToken() ?? throw new OAuthTokenNotFoundException();
-        IList<string?> folderIdList = configuration.GetFolderIds();
-        IList<string?> cloudIdList = configuration.GetCloudIds();
+        var serviceProvider = new ServiceCollection()
+            .AddSingleton<IConfiguration, Configuration>()
+            .AddSingleton<ILoggerStrategy, ConsoleLoggerStrategy>()
+            .AddSingleton(TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"))
+            .AddSingleton<IYandexCloudSdk>(provider => 
+            {
+                var config = provider.GetRequiredService<IConfiguration>();
+                var oAuthToken = config.GetOAuthToken() ?? throw new OAuthTokenNotFoundException();
+                return new YandexCloudSdk(oAuthToken);
+            })
+            .AddSingleton<InstanceService.InstanceServiceClient>(provider => 
+            {
+                var sdk = provider.GetRequiredService<IYandexCloudSdk>();
+                return sdk.GetInstanceService();
+            })
+            .AddSingleton<IInstanceHandler, InstanceHandler>()
+            .AddSingleton<ILaunchService, LaunchService>()
+            .BuildServiceProvider();
 
-        var yandexCloudSdk = new YandexCloudSdk(oauthToken);
-        var instanceService = yandexCloudSdk.GetInstanceService();
-        var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
-        var instanceHandler = new InstanceHandler(logger, instanceService, timeZoneInfo);
-        var launchService = new LaunchService(yandexCloudSdk, instanceHandler);
+        var launchService = serviceProvider.GetRequiredService<ILaunchService>();
+        var config = serviceProvider.GetRequiredService<IConfiguration>();
 
-        await launchService.Launch(cloudIdList, folderIdList).ConfigureAwait(false);
+        var cloudIds = config.GetCloudIds();
+        var folderIds = config.GetFolderIds();
+
+        await launchService.Launch(cloudIds, folderIds);
     }
 }
