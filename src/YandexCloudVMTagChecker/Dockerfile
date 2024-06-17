@@ -1,9 +1,11 @@
 ﻿FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y cron && \
+RUN apt-get update && apt-get install -y cron tzdata && \
     mkdir -p /var/run/ /var/spool/cron/crontabs /var/log && \
-    touch /var/log/cron.log
+    touch /var/log/cron.log 
+
+ENV TZ=UTC
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
