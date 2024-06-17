@@ -1,1 +1,0 @@
-0 0 * * * /usr/bin/dotnet /app/YandexCloudVMTagChecker.dll >> /var/log/cron.log 2>&1

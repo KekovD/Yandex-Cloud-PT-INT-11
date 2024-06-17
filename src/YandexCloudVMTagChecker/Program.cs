@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Yandex.Cloud;
 using Yandex.Cloud.Compute.V1;
+using Yandex.Cloud.Credentials;
 using YandexCloudVMTagChecker.Exceptions;
 using YandexCloudVMTagChecker.Models;
 using YandexCloudVMTagChecker.Models.Interfaces;
@@ -15,14 +17,19 @@ class Program
         var serviceProvider = new ServiceCollection()
             .AddSingleton<IConfiguration, Configuration>()
             .AddSingleton<ILoggerStrategy, ConsoleLoggerStrategy>()
-            .AddSingleton(TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"))
-            .AddSingleton<IYandexCloudSdk>(provider => 
+            .AddSingleton<TimeZoneInfo>(provider =>
+            {
+                var config = provider.GetRequiredService<IConfiguration>();
+                var timeZoneId = config.GetTimeZoneId() ?? throw new TimeZoneIdNotFoundException();;
+                return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            })
+            .AddSingleton<IYandexCloudSdk>(provider =>
             {
                 var config = provider.GetRequiredService<IConfiguration>();
                 var oAuthToken = config.GetOAuthToken() ?? throw new OAuthTokenNotFoundException();
-                return new YandexCloudSdk(oAuthToken);
+                return new YandexCloudSdk(new Sdk(new OAuthCredentialsProvider(oAuthToken)));
             })
-            .AddSingleton<InstanceService.InstanceServiceClient>(provider => 
+            .AddSingleton<InstanceService.InstanceServiceClient>(provider =>
             {
                 var sdk = provider.GetRequiredService<IYandexCloudSdk>();
                 return sdk.GetInstanceService();

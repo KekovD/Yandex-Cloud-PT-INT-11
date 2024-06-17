@@ -1,7 +1,6 @@
 using Google.Protobuf.Collections;
 using Yandex.Cloud;
 using Yandex.Cloud.Compute.V1;
-using Yandex.Cloud.Credentials;
 using Yandex.Cloud.Resourcemanager.V1;
 using YandexCloudVMTagChecker.Models.Interfaces;
 
@@ -9,13 +8,11 @@ namespace YandexCloudVMTagChecker.Models;
 
 public class YandexCloudSdk : IYandexCloudSdk
 {
-    private readonly string _oauthToken;
     private readonly Sdk _sdk;
 
-    public YandexCloudSdk(string oauthToken)
+    public YandexCloudSdk(Sdk sdk)
     {
-        _oauthToken = oauthToken;
-        _sdk = new Sdk(new OAuthCredentialsProvider(oauthToken));
+        _sdk = sdk;
     }
 
     public InstanceService.InstanceServiceClient GetInstanceService() => _sdk.Services.Compute.InstanceService;
