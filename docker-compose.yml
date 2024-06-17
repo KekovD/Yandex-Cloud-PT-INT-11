@@ -3,9 +3,5 @@ services:
   yandex-cloud-vm-tag-checker:
     build:
       dockerfile: src/YandexCloudVMTagChecker/Dockerfile
-    environment:
-      - OAUTH_TOKEN=${OAUTH_TOKEN}
-      - FOLDER_ID_1=${FOLDER_ID_1}
-      - FOLDER_ID_2=${FOLDER_ID_2}
     env_file:
       - .env
