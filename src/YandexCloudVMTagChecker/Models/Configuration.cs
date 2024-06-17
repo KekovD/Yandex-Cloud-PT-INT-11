@@ -10,7 +10,7 @@ public class Configuration : IConfiguration
     public IList<string?> GetCloudIds() => GetEnvironmentValuesByPattern("CLOUD_ID_");
 
     public IList<string?> GetFolderIds() => GetEnvironmentValuesByPattern("FOLDER_ID_");
-    public string? GetTimeZoneId() => Environment.GetEnvironmentVariable("TIME_ZONE");
+    public string GetTimeZoneId() => Environment.GetEnvironmentVariable("TIME_ZONE_PROGRAM") ?? "UTC";
 
     private static IList<string?> GetEnvironmentValuesByPattern(string pattern) =>
         Environment.GetEnvironmentVariables()

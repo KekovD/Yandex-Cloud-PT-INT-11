@@ -6,4 +6,4 @@ services:
     env_file:
       - .env
     environment:
-      - TZ=Europe/Moscow
+      - TZ=${TZ_DOCKER}

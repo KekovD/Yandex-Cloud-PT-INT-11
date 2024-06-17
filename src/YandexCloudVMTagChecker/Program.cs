@@ -20,7 +20,7 @@ class Program
             .AddSingleton<TimeZoneInfo>(provider =>
             {
                 var config = provider.GetRequiredService<IConfiguration>();
-                var timeZoneId = config.GetTimeZoneId() ?? throw new TimeZoneIdNotFoundException();;
+                var timeZoneId = config.GetTimeZoneId();
                 return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
             })
             .AddSingleton<IYandexCloudSdk>(provider =>
