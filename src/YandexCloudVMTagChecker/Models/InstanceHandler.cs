@@ -99,8 +99,6 @@ public class InstanceHandler : IInstanceHandler
         {
             expiredDate = TimeZoneInfo.ConvertTime(expiredDate, _timeZoneInfo).Date;
         }
-
-        Console.WriteLine(expiredDate + " " + currentDate);
     
         if (tryGetValue && tryParseExact)
         {
