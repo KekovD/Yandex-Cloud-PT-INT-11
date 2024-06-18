@@ -15,27 +15,29 @@ class Program
     static async Task Main(string[] args)
     {
         var serviceProvider = new ServiceCollection()
-            .AddSingleton<IConfiguration, Configuration>()
-            .AddSingleton<ILoggerStrategy, ConsoleLoggerStrategy>()
-            .AddSingleton<TimeZoneInfo>(provider =>
+            .AddTransient<IConfiguration, Configuration>()
+            .AddTransient<ILoggerStrategy, ConsoleLoggerStrategy>()
+            .AddTransient<TimeZoneInfo>(provider =>
             {
                 var config = provider.GetRequiredService<IConfiguration>();
                 var timeZoneId = config.GetTimeZoneId();
                 return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
             })
-            .AddSingleton<IYandexCloudSdk>(provider =>
+            .AddTransient<IYandexCloudSdk>(provider =>
             {
                 var config = provider.GetRequiredService<IConfiguration>();
                 var oAuthToken = config.GetOAuthToken() ?? throw new OAuthTokenNotFoundException();
                 return new YandexCloudSdk(new Sdk(new OAuthCredentialsProvider(oAuthToken)));
             })
-            .AddSingleton<InstanceService.InstanceServiceClient>(provider =>
+            .AddTransient<IInstanceExpirationChecker, InstanceExpirationChecker>()
+            .AddTransient<IInstanceClientWrapper, InstanceClientWrapper>()
+            .AddTransient<InstanceService.InstanceServiceClient>(provider =>
             {
                 var sdk = provider.GetRequiredService<IYandexCloudSdk>();
                 return sdk.GetInstanceService();
             })
-            .AddSingleton<IInstanceHandler, InstanceHandler>()
-            .AddSingleton<ILaunchService, LaunchService>()
+            .AddTransient<IInstanceHandler, InstanceHandler>()
+            .AddTransient<ILaunchService, LaunchService>()
             .BuildServiceProvider();
 
         var launchService = serviceProvider.GetRequiredService<ILaunchService>();
