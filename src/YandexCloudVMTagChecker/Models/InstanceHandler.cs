@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using Google.Protobuf.Collections;
 using Yandex.Cloud.Compute.V1;
 using Yandex.Cloud.Resourcemanager.V1;
@@ -26,9 +27,22 @@ public class InstanceHandler : IInstanceHandler
     public async Task CheckAndShutdownExpiredInstancesAsync(RepeatedField<Folder> folders, Cloud cloud)
     {
         var message = new StringBuilder();
+        
+        message.AppendFormat("[{0}] <+++Start work in the cloud {1} (ID: {2})",
+            TimeZoneInfo.ConvertTime(DateTime.UtcNow, _timeZoneInfo), cloud.Name, cloud.Id);
+
+        await _loggerStrategy.LogAsync(message.ToString()).ConfigureAwait(false);
+        message.Clear();
 
         foreach (var folder in folders)
         {
+            message
+                .AppendFormat("[{0}] <+++++Start work in the folder {1} (ID: {2})",
+                    TimeZoneInfo.ConvertTime(DateTime.UtcNow, _timeZoneInfo), folder.Name, folder.Id);
+
+            await _loggerStrategy.LogAsync(message.ToString()).ConfigureAwait(false);
+            message.Clear();
+            
             var instancesResponse = await GetInstancesAsync(folder).ConfigureAwait(false);
 
             foreach (var instance in instancesResponse.Instances)
@@ -37,14 +51,14 @@ public class InstanceHandler : IInstanceHandler
             }
 
             message
-                .AppendFormat("[{0}] Work in the folder {1} (ID: {2}) is completed",
+                .AppendFormat("[{0}] <-----End work in the folder {1} (ID: {2})",
                     TimeZoneInfo.ConvertTime(DateTime.UtcNow, _timeZoneInfo), folder.Name, folder.Id);
 
             await _loggerStrategy.LogAsync(message.ToString()).ConfigureAwait(false);
             message.Clear();
         }
 
-        message.AppendFormat("[{0}] Work in the cloud {1} (ID: {2}) is completed",
+        message.AppendFormat("[{0}] <---End work in the cloud {1} (ID: {2})",
             TimeZoneInfo.ConvertTime(DateTime.UtcNow, _timeZoneInfo), cloud.Name, cloud.Id);
 
         await _loggerStrategy.LogAsync(message.ToString()).ConfigureAwait(false);
@@ -66,7 +80,7 @@ public class InstanceHandler : IInstanceHandler
             var message = new StringBuilder();
 
             message.AppendFormat(
-                "[{0}] Cloud {1} (ID: {2}) folder {3} (ID: {4}) VM {5} (ID: {6}) has expired. Shutting down...",
+                "[{0}] [INFO] Cloud {1} (ID: {2}) folder {3} (ID: {4}) VM {5} (ID: {6}) has expired. Shutting down...",
                 TimeZoneInfo.ConvertTime(DateTime.UtcNow, _timeZoneInfo),
                 cloud.Name,
                 cloud.Id,
@@ -88,28 +102,25 @@ public class InstanceHandler : IInstanceHandler
     private async Task<bool> HasExpired(Instance instance, Folder folder, Cloud cloud)
     {
         var tryGetValue = instance.Labels.TryGetValue("expired_date", out string expiredDateStr);
-
+        
         var tryParseExact = DateTime.TryParseExact(
             expiredDateStr, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime expiredDate);
 
         var currentTime = TimeZoneInfo.ConvertTime(DateTime.UtcNow, _timeZoneInfo);
         var currentDate = currentTime.Date;
-
-        if (tryParseExact)
-        {
-            expiredDate = TimeZoneInfo.ConvertTime(expiredDate, _timeZoneInfo).Date;
-        }
+        
     
         if (tryGetValue && tryParseExact)
         {
+            expiredDate = TimeZoneInfo.ConvertTime(expiredDate, _timeZoneInfo).Date;
             return expiredDate < currentDate;
         }
 
         var message = new StringBuilder();
 
         message
-            .AppendFormat("[{0}] Cloud {1} (ID: {2}) folder {3} (ID: {4}) VM {5} (ID: {6}). ",
-                DateTime.UtcNow, cloud.Name, cloud.Id, folder.Name, folder.Id, instance.Name, instance.Id);
+            .AppendFormat("[{0}] [WARNING] Cloud {1} (ID: {2}) folder {3} (ID: {4}) VM {5} (ID: {6}). ",
+                currentTime, cloud.Name, cloud.Id, folder.Name, folder.Id, instance.Name, instance.Id);
 
         message
             .Append(!tryGetValue
