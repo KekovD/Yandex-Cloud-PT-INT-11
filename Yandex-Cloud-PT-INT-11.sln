@@ -13,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{8011FD
 		crontab = crontab
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D05F9E7-97ED-4C7F-A51D-4F9F718703B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "tests\UnitTests\UnitTests.csproj", "{77A7579B-9678-4E14-9B6A-B25B882E9246}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,8 +27,13 @@ Global
 		{269E51A0-3B0B-43A7-9D20-E339AB4B8826}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{269E51A0-3B0B-43A7-9D20-E339AB4B8826}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{269E51A0-3B0B-43A7-9D20-E339AB4B8826}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77A7579B-9678-4E14-9B6A-B25B882E9246}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77A7579B-9678-4E14-9B6A-B25B882E9246}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77A7579B-9678-4E14-9B6A-B25B882E9246}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77A7579B-9678-4E14-9B6A-B25B882E9246}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{269E51A0-3B0B-43A7-9D20-E339AB4B8826} = {2B4B5015-F365-4467-A66D-F08FD0310383}
+		{77A7579B-9678-4E14-9B6A-B25B882E9246} = {5D05F9E7-97ED-4C7F-A51D-4F9F718703B0}
 	EndGlobalSection
 EndGlobal
