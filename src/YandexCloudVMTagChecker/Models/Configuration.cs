@@ -15,7 +15,8 @@ public class Configuration : IConfiguration
     private static IList<string?> GetEnvironmentValuesByPattern(string pattern) =>
         Environment.GetEnvironmentVariables()
             .Cast<DictionaryEntry>()
-            .Where(e => ((string)e.Key).StartsWith(pattern))
+            .Where(e => ((string)e.Key)
+                .StartsWith(pattern))
             .Select(e => (string?)e.Value)
             .ToList();
 }
