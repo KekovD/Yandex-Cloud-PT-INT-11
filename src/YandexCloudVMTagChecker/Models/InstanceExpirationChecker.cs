@@ -27,7 +27,7 @@ public class InstanceExpirationChecker : IInstanceExpirationChecker
         }
 
         var message = CreateErrorMessage(instance, folder, cloud, expiredDate.HasValue);
-        await _loggerStrategy.LogAsync(message);
+        await _loggerStrategy.LogAsync(message).ConfigureAwait(false);
 
         return false;
     }

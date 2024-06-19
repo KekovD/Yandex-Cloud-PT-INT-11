@@ -31,7 +31,7 @@ public class InstanceHandler : IInstanceHandler
 
         logMessage.AppendFormat("<+++Start work in the cloud {0} (ID: {1})", cloud.Name, cloud.Id);
 
-        await LogAsync(logMessage.ToString());
+        await LogAsync(logMessage.ToString()).ConfigureAwait(false);
 
         foreach (var folder in folders)
         {
@@ -39,7 +39,7 @@ public class InstanceHandler : IInstanceHandler
 
             logMessage.AppendFormat("<+++++Start work in the folder {0} (ID: {1})", folder.Name, folder.Id);
 
-            await LogAsync(logMessage.ToString());
+            await LogAsync(logMessage.ToString()).ConfigureAwait(false);
 
             var instancesResponse =
                 await _instanceClientWrapper.ListAsync(new ListInstancesRequest { FolderId = folder.Id })
@@ -54,14 +54,14 @@ public class InstanceHandler : IInstanceHandler
 
             logMessage.AppendFormat("<-----End work in the folder {0} (ID: {1})", folder.Name, folder.Id);
 
-            await LogAsync(logMessage.ToString());
+            await LogAsync(logMessage.ToString()).ConfigureAwait(false);
         }
 
         logMessage.Clear();
 
         logMessage.AppendFormat("<---End work in the cloud {0} (ID: {1})", cloud.Name, cloud.Id);
 
-        await LogAsync(logMessage.ToString());
+        await LogAsync(logMessage.ToString()).ConfigureAwait(false);
     }
 
     private async Task CheckAndShutdownInstanceAsync(Instance instance, Folder folder, Cloud cloud)
@@ -74,7 +74,7 @@ public class InstanceHandler : IInstanceHandler
                 "[INFO] Cloud {0} (ID: {1}) folder {2} (ID: {3}) VM {4} (ID: {5}) has expired. Shutting down...",
                 cloud.Name, cloud.Id, folder.Name, folder.Id, instance.Name, instance.Id);
 
-            await LogAsync(logMessage.ToString());
+            await LogAsync(logMessage.ToString()).ConfigureAwait(false);
 
             await _instanceClientWrapper.StopAsync(new StopInstanceRequest { InstanceId = instance.Id })
                 .ConfigureAwait(false);
